@@ -69,6 +69,7 @@ data/processed/*.csv
 *.csv
 *.xlsx
 *.zip
+*.pdf
 *.parquet
 *.h5
 *.pkl
