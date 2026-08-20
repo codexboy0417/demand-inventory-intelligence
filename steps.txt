@@ -1,0 +1,107 @@
+================================================================================
+PROJECT FORESIGHT — DEMAND & INVENTORY INTELLIGENCE
+Complete Step-by-Step Execution Guide
+================================================================================
+
+PREREQUISITES:
+- Python 3.10+ installed
+- Terminal / PowerShell
+
+--------------------------------------------------------------------------------
+STEP 1: INSTALL DEPENDENCIES
+--------------------------------------------------------------------------------
+Open terminal in the project root directory (Zidio/) and install requirements:
+
+    pip install -r requirements.txt
+
+
+--------------------------------------------------------------------------------
+STEP 2: RUN DATA PIPELINE & FEATURE ENGINEERING
+--------------------------------------------------------------------------------
+Cleans raw transaction extracts, builds the 4 Star-Schema tables (sales_daily,
+sku_master, calendar, inventory_snapshots), and engineers temporal features:
+
+    python src/pipeline.py
+
+
+--------------------------------------------------------------------------------
+STEP 3: RUN MULTI-MODEL TIME-SERIES BACKTESTING
+--------------------------------------------------------------------------------
+Evaluates out-of-sample forecast accuracy across 4 rolling folds for Baseline,
+Random Forest, XGBoost, and LightGBM:
+
+    python src/forecast.py
+
+
+--------------------------------------------------------------------------------
+STEP 4: TRAIN FORECAST MODEL & RUN INVENTORY RISK SCORING
+--------------------------------------------------------------------------------
+Trains the chosen Machine Learning model on full historical features, generates
+forward multi-week demand forecasts, scores 2x2 inventory risks, and exports
+the decision matrix report:
+
+    # Train with LightGBM (Recommended - 72.9% WAPE):
+    python src/risk.py lightgbm
+
+    # Or train with XGBoost:
+    python src/risk.py xgboost
+
+    # Or train with Random Forest:
+    python src/risk.py random_forest
+
+    Output generated: reports/inventory_risk_decision_matrix.csv
+
+
+--------------------------------------------------------------------------------
+STEP 5: LAUNCH THE 7-PAGE STREAMLIT PLANNING DASHBOARD
+--------------------------------------------------------------------------------
+Launches the interactive dashboard web application:
+
+    python run.py
+
+    # Or alternatively:
+    streamlit run app/main.py
+
+    Browser URL: http://localhost:8501
+
+    Available Pages in Dashboard:
+    1. Home Page (Architecture & Key KPIs)
+    2. Sales Analytics (Trends, Pareto Top Movers, Category Share)
+    3. Forecast (Multi-Model Evaluation & SKU Demand Forecaster)
+    4. Inventory Dashboard (Stock Levels, Lead Times, Coverage)
+    5. Risk Dashboard (Interactive 2x2 Decision Grid)
+    6. Product Details (SKU Margin & Action Profile)
+    7. Executive Summary Dashboard (Top Reorder & Markdown Lists)
+
+
+--------------------------------------------------------------------------------
+STEP 6: LAUNCH THE FASTAPI REST SCORING SERVICE
+--------------------------------------------------------------------------------
+Starts the REST API for single-SKU and batch scoring:
+
+    python service/api.py
+
+    API Documentation (Swagger UI): http://127.0.0.1:8000/docs
+    Endpoints:
+    - GET  /                   (Health check & SKU count)
+    - GET  /forecast/{sku_id}  (Single SKU forecast & risk profile)
+    - POST /score-batch        (Batch SKU scoring)
+
+
+--------------------------------------------------------------------------------
+STEP 7: RUN THE STANDALONE JUPYTER NOTEBOOK
+--------------------------------------------------------------------------------
+To run the complete 8-phase pipeline cell-by-cell interactively:
+
+    jupyter notebook notebooks/project_foresight_complete_ml_pipeline.ipynb
+
+
+--------------------------------------------------------------------------------
+STEP 8: REVIEW DOCUMENTATION & EXECUTIVE REPORTS
+--------------------------------------------------------------------------------
+- Executive Presentation Deck: reports/executive_presentation.md
+- Data Quality & EDA Memo    : reports/eda_insight_memo.md
+- Decision Matrix CSV        : reports/inventory_risk_decision_matrix.csv
+- Main Documentation        : README.md
+
+================================================================================
