@@ -108,7 +108,8 @@ def create_notebook():
         "source": [
             "# Monthly Revenue Trend Analysis\n",
             "df['date_dt'] = pd.to_datetime(df['date'])\n",
-            "monthly = df.groupby(pd.Grouper(key='date_dt', freq='M'))['revenue'].sum().reset_index()\n",
+            "monthly = df.groupby(df['date_dt'].dt.to_period('M'))['revenue'].sum().reset_index()\n",
+            "monthly['date_dt'] = monthly['date_dt'].dt.to_timestamp()\n",
             "\n",
             "plt.figure(figsize=(12, 4))\n",
             "plt.plot(monthly['date_dt'], monthly['revenue'] / 1e3, marker='o', color='#2b5c8f', linewidth=2.5)\n",

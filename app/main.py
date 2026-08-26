@@ -93,7 +93,8 @@ elif page == "📊 Sales Analytics":
     st.caption("Historical performance, top movers, category breakdowns, and revenue dynamics.")
     
     sales_daily['date_dt'] = pd.to_datetime(sales_daily['date'])
-    monthly_sales = sales_daily.set_index('date_dt').resample('M')['revenue'].sum().reset_index()
+    monthly_sales = sales_daily.groupby(sales_daily['date_dt'].dt.to_period('M'))['revenue'].sum().reset_index()
+    monthly_sales['date_dt'] = monthly_sales['date_dt'].dt.to_timestamp()
     
     fig_rev = px.line(monthly_sales, x='date_dt', y='revenue', title="Monthly Revenue Trend (2009–2011)", labels={'revenue': 'Revenue (₹)', 'date_dt': 'Date'})
     st.plotly_chart(fig_rev, use_container_width=True)
