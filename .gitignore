@@ -74,6 +74,7 @@ data/raw/
 # Allow processed star schema datasets & reports for cloud deployment
 !data/processed/*.csv
 !reports/*.csv
+!reports/Project_FORESIGHT_Final_Report.pdf
 
 # Operating System Files
 .DS_Store

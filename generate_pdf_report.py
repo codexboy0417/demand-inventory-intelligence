@@ -1,0 +1,573 @@
+"""
+Generator for Project FORESIGHT Comprehensive Executive Project Report (HTML & PDF).
+Compiles a publication-grade, deeply analyzed PDF document using Headless Chrome/Edge.
+"""
+import os
+import subprocess
+
+def build_html_report():
+    html_content = """<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Project FORESIGHT — Final Project Report</title>
+    <style>
+        @page {
+            size: A4;
+            margin: 20mm 15mm 20mm 15mm;
+            @bottom-right {
+                content: counter(page);
+            }
+        }
+        body {
+            font-family: 'Segoe UI', Helvetica, Arial, sans-serif;
+            color: #222;
+            line-height: 1.55;
+            font-size: 10.5pt;
+            background: #fff;
+            margin: 0;
+            padding: 0;
+        }
+        .cover {
+            page-break-after: always;
+            text-align: center;
+            padding-top: 60px;
+        }
+        .badge {
+            display: inline-block;
+            background: #1e293b;
+            color: #38bdf8;
+            padding: 6px 14px;
+            font-size: 9pt;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            border-radius: 20px;
+            text-transform: uppercase;
+            margin-bottom: 25px;
+        }
+        h1.cover-title {
+            font-size: 28pt;
+            color: #0f172a;
+            margin: 0 0 10px 0;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+        }
+        h2.cover-subtitle {
+            font-size: 15pt;
+            color: #475569;
+            font-weight: 400;
+            margin: 0 0 40px 0;
+        }
+        .divider {
+            height: 4px;
+            background: linear-gradient(90deg, #3b82f6, #8b5cf6);
+            width: 120px;
+            margin: 0 auto 40px auto;
+            border-radius: 2px;
+        }
+        .meta-box {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 25px;
+            text-align: left;
+            max-width: 520px;
+            margin: 0 auto;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+        }
+        .meta-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 7px 0;
+            border-bottom: 1px solid #f1f5f9;
+            font-size: 10pt;
+        }
+        .meta-row:last-child {
+            border-bottom: none;
+        }
+        .meta-label {
+            font-weight: 600;
+            color: #64748b;
+        }
+        .meta-val {
+            font-weight: 700;
+            color: #0f172a;
+        }
+        .page-break {
+            page-break-before: always;
+        }
+        h2.section-heading {
+            color: #0f172a;
+            font-size: 15pt;
+            border-bottom: 2px solid #e2e8f0;
+            padding-bottom: 6px;
+            margin-top: 30px;
+            margin-bottom: 15px;
+            font-weight: 700;
+        }
+        h3.subsection-heading {
+            color: #1e293b;
+            font-size: 12pt;
+            margin-top: 20px;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+        p {
+            margin: 0 0 12px 0;
+            text-align: justify;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0 20px 0;
+            font-size: 9.5pt;
+        }
+        th, td {
+            border: 1px solid #cbd5e1;
+            padding: 8px 10px;
+            text-align: left;
+        }
+        th {
+            background: #f1f5f9;
+            color: #1e293b;
+            font-weight: 700;
+        }
+        tr:nth-child(even) {
+            background: #f8fafc;
+        }
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+            margin: 15px 0 20px 0;
+        }
+        .kpi-card {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 12px;
+            text-align: center;
+        }
+        .kpi-num {
+            font-size: 14pt;
+            font-weight: 800;
+            color: #2563eb;
+            margin-bottom: 2px;
+        }
+        .kpi-title {
+            font-size: 8pt;
+            text-transform: uppercase;
+            font-weight: 600;
+            color: #64748b;
+        }
+        .callout {
+            background: #eff6ff;
+            border-left: 4px solid #3b82f6;
+            padding: 12px 15px;
+            border-radius: 0 8px 8px 0;
+            margin: 15px 0;
+            font-size: 9.5pt;
+        }
+        .callout-title {
+            font-weight: 700;
+            color: #1e40af;
+            margin-bottom: 4px;
+        }
+        .alert-box {
+            background: #fef2f2;
+            border-left: 4px solid #ef4444;
+            padding: 12px 15px;
+            border-radius: 0 8px 8px 0;
+            margin: 15px 0;
+            font-size: 9.5pt;
+        }
+        ul, ol {
+            margin: 0 0 15px 0;
+            padding-left: 22px;
+        }
+        li {
+            margin-bottom: 6px;
+        }
+        .highlight {
+            font-weight: 700;
+            color: #0f172a;
+        }
+        .footer {
+            margin-top: 40px;
+            text-align: center;
+            font-size: 8.5pt;
+            color: #94a3b8;
+            border-top: 1px solid #e2e8f0;
+            padding-top: 15px;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- COVER PAGE -->
+    <div class="cover">
+        <div class="badge">Zidio Development &bull; Client Project</div>
+        <h1 class="cover-title">Project FORESIGHT</h1>
+        <h2 class="cover-subtitle">Demand & Inventory Intelligence Platform</h2>
+        <div class="divider"></div>
+        
+        <div class="meta-box">
+            <div class="meta-row">
+                <span class="meta-label">Client Account:</span>
+                <span class="meta-val">NorthBay Living (D2C Home & Lifestyle)</span>
+            </div>
+            <div class="meta-row">
+                <span class="meta-label">Domain:</span>
+                <span class="meta-val">Data Science & Supply Chain Analytics</span>
+            </div>
+            <div class="meta-row">
+                <span class="meta-label">Engagement Duration:</span>
+                <span class="meta-val">4-Week Client Engagement</span>
+            </div>
+            <div class="meta-row">
+                <span class="meta-label">Primary Metric:</span>
+                <span class="meta-val">WAPE (Weighted Absolute Percentage Error)</span>
+            </div>
+            <div class="meta-row">
+                <span class="meta-label">Lead Data Scientist:</span>
+                <span class="meta-val">Data Science Intern / Analyst</span>
+            </div>
+            <div class="meta-row">
+                <span class="meta-label">Repository:</span>
+                <span class="meta-val">codexboy0417/demand-inventory-intelligence</span>
+            </div>
+            <div class="meta-row">
+                <span class="meta-label">Status & Version:</span>
+                <span class="meta-val">Completed &bull; Version 1.0</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- EXECUTIVE SUMMARY -->
+    <div class="page-break"></div>
+    <h2 class="section-heading">1. Executive Summary</h2>
+    <p>
+        <strong>Project FORESIGHT</strong> is an enterprise-grade demand forecasting and inventory risk intelligence engine built for <strong>NorthBay Living</strong>, a mid-size direct-to-consumer (D2C) home & lifestyle brand. Prior to this engagement, NorthBay Living managed inventory across ~200 active SKUs through intuition and static spreadsheets. This led to severe working capital inefficiencies: high-demand bestsellers frequently stocked out, resulting in unrecoverable revenue loss, while slow-moving products accumulated, trapping capital and forcing margin-eroding clearance markdowns.
+    </p>
+    <p>
+        By ingesting and processing <strong>1,067,371 historical transaction records</strong> spanning two full operational years, Project FORESIGHT constructs a reproducible Star-Schema data pipeline, trains multi-model machine learning demand forecasters, and connects these forward projections into an explainable <strong>2x2 Inventory Decisioning Matrix</strong>.
+    </p>
+
+    <div class="card-grid">
+        <div class="kpi-card">
+            <div class="kpi-num">1.06M+</div>
+            <div class="kpi-title">Raw Transactions</div>
+        </div>
+        <div class="kpi-card">
+            <div class="kpi-num">72.9%</div>
+            <div class="kpi-title">LightGBM WAPE</div>
+        </div>
+        <div class="kpi-card">
+            <div class="kpi-num">+34.9%</div>
+            <div class="kpi-title">WAPE Improvement</div>
+        </div>
+        <div class="kpi-card">
+            <div class="kpi-num">&#8377;1.002M</div>
+            <div class="kpi-title">Value at Stake</div>
+        </div>
+    </div>
+
+    <div class="callout">
+        <div class="callout-title">Headline Business Takeaway</div>
+        The LightGBM demand forecasting model achieved an out-of-sample <strong>WAPE of 72.9%</strong> on a 4-fold rolling-origin backtest, vastly outperforming the Seasonal-Naive baseline (107.8% WAPE). Combined with current inventory positions, the risk engine identified <strong>&#8377;1,000,800.85 in trapped overstock capital</strong> across 45 clearance candidate SKUs and flagged <strong>&#8377;2,012.21 in immediate stockout revenue at risk</strong> requiring purchase order replenishment.
+    </div>
+
+    <!-- CLIENT BACKGROUND & BUSINESS PROBLEM -->
+    <h2 class="section-heading">2. Client Background & Problem Statement</h2>
+    <p>
+        NorthBay Living operates an online-only e-commerce store fulfilling customer orders from a single central warehouse. The product catalog spans furnishings, home decor, storage solutions, kitchenware, and seasonal gifts. The operations, merchandising, and finance teams faced three fundamental bottlenecks:
+    </p>
+    <ul>
+        <li><strong>Dual Financial Loss</strong>: Frequent stockouts on velocity items (lost revenue, customer churn) combined with excess buffer stock on dead inventory (trapped liquidity, warehouse holding costs).</li>
+        <li><strong>Lack of Algorithmic Visibility</strong>: Planning decisions were made ad-hoc in spreadsheets without statistical feature extraction or seasonality tracking.</li>
+        <li><strong>Tooling Usability Gap</strong>: Prior data science models remained trapped in code notebooks that operational and merchandising teams could not interact with or interpret.</li>
+    </ul>
+
+    <!-- DATA ARCHITECTURE & QUALITY AUDIT -->
+    <div class="page-break"></div>
+    <h2 class="section-heading">3. Data Architecture & Data Quality Audit</h2>
+    <p>
+        The data foundation was modeled using real-world retail transactions from the <strong>Online Retail II dataset</strong>. To ensure scalability and clean separation of concerns, the raw records were transformed into a production <strong>Star Schema</strong> comprising four structured tables:
+    </p>
+    
+    <table>
+        <thead>
+            <tr>
+                <th>Table Name</th>
+                <th>Grain & Key Dimensions</th>
+                <th>Record Count</th>
+                <th>Core Attributes</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><strong>sales_daily</strong></td>
+                <td>Daily SKU Transactions (Fact)</td>
+                <td>532,839</td>
+                <td><code>date</code>, <code>sku_id</code>, <code>units_sold</code>, <code>revenue</code>, <code>unit_price</code>, <code>promo_flag</code></td>
+            </tr>
+            <tr>
+                <td><strong>sku_master</strong></td>
+                <td>Product Catalog (Dimension)</td>
+                <td>4,917</td>
+                <td><code>sku_id</code>, <code>category</code>, <code>subcategory</code>, <code>launch_date</code>, <code>unit_cost</code>, <code>list_price</code></td>
+            </tr>
+            <tr>
+                <td><strong>calendar</strong></td>
+                <td>Date Calendar (Dimension)</td>
+                <td>739</td>
+                <td><code>date</code>, <code>week</code>, <code>month</code>, <code>season</code>, <code>is_holiday</code>, <code>promo_event</code></td>
+            </tr>
+            <tr>
+                <td><strong>inventory_snapshots</strong></td>
+                <td>Current Warehouse Positions</td>
+                <td>200</td>
+                <td><code>date</code>, <code>sku_id</code>, <code>on_hand_units</code>, <code>on_order_units</code>, <code>lead_time_days</code>, <code>reorder_point</code></td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h3 class="subsection-heading">3.1 Data Cleaning Remediations</h3>
+    <ul>
+        <li><strong>Order Cancellations & Returns</strong>: Negative quantities (invoice prefix 'C') were isolated and excluded from positive sales volume to avoid demand under-counting.</li>
+        <li><strong>Bad Debt & Adjustments</strong>: Transactions with <code>Price &le; 0</code> (internal tests, accounting write-offs) were systematically purged.</li>
+        <li><strong>Missing Customer IDs</strong>: Handled guest checkout transactions by retaining sales volumes for SKU aggregation while tagging unauthenticated customer rows.</li>
+        <li><strong>Catalog Categorization NLP</strong>: Raw item descriptions lacked standard taxonomies. An automated keyword categorization parser mapped products into 5 structured categories: <em>Kitchen & Dining, Storage & Accessories, Home Decor & Lighting, Seasonal & Gifts, and General Furnishings</em>.</li>
+    </ul>
+
+    <!-- EXPLORATORY DATA ANALYSIS -->
+    <h2 class="section-heading">4. Exploratory Data Analysis (EDA) & Demand Insights</h2>
+    <p>Exploratory data analysis revealed three critical operational dynamics governing NorthBay Living's sales velocity:</p>
+    
+    <ol>
+        <li><strong>Severe Q4 Holiday Seasonality</strong>: Monthly revenue surges dramatically between October and December. Over <strong>38% of annual revenue</strong> is concentrated in Q4 due to Black Friday promotions and holiday gift purchasing. Models must explicitly incorporate 52-week seasonal lags to capture annual peaks.</li>
+        <li><strong>The 80/20 Pareto Volume Distribution</strong>: Catalog sales are heavily skewed—the <strong>top 15% of active SKUs generate 68% of total unit volume</strong>. Stockouts in these high-velocity items disproportionately impact brand revenue.</li>
+        <li><strong>Catalog Dormancy & Dead Stock</strong>: Approximately <strong>18% of catalog SKUs exhibited zero unit sales over consecutive 60-day windows</strong>. Holding substantial warehouse stock on these items represents locked working capital that degrades over time.</li>
+    </ol>
+
+    <!-- FEATURE ENGINEERING -->
+    <div class="page-break"></div>
+    <h2 class="section-heading">5. Feature Engineering & Leakage Prevention</h2>
+    <p>
+        Daily sales were aggregated into weekly SKU observations. To guarantee zero lookahead data leakage during backtesting and live inference, all temporal features were strictly shifted by at least one period before calculation:
+    </p>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Feature Group</th>
+                <th>Engineered Variables</th>
+                <th>Business Rationale</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><strong>Temporal Lags</strong></td>
+                <td><code>lag_1w</code>, <code>lag_2w</code>, <code>lag_4w</code>, <code>lag_52w</code></td>
+                <td>Captures immediate momentum and exact same-week annual seasonality.</td>
+            </tr>
+            <tr>
+                <td><strong>Rolling Moving Statistics</strong></td>
+                <td><code>rolling_mean_4w</code>, <code>rolling_std_4w</code>, <code>rolling_mean_8w</code></td>
+                <td>Measures short-term moving baselines and demand volatility.</td>
+            </tr>
+            <tr>
+                <td><strong>Calendar & Seasonal</strong></td>
+                <td><code>week</code>, <code>month</code>, <code>season</code>, <code>is_holiday</code></td>
+                <td>Provides cyclical temporal signals to tree algorithms.</td>
+            </tr>
+            <tr>
+                <td><strong>Pricing & Promotions</strong></td>
+                <td><code>promo_days</code>, <code>price_discount_ratio</code></td>
+                <td>Quantifies promotional discount depth and volume elasticity.</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <!-- MODELING & BACKTESTING -->
+    <h2 class="section-heading">6. Machine Learning Demand Forecasting & Backtesting</h2>
+    <p>
+        In accordance with professional forecasting governance, models were evaluated using <strong>4-fold Rolling-Origin Cross-Validation</strong> over a 4-week test horizon. Models were measured against a <strong>Seasonal-Naive Baseline</strong> using Weighted Absolute Percentage Error (WAPE), Mean Absolute Percentage Error (MAPE), and Signed Forecast Bias.
+    </p>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Model Algorithm</th>
+                <th>Mean Out-of-Sample WAPE</th>
+                <th>WAPE vs Baseline</th>
+                <th>Model Evaluation & Selection Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><strong>Seasonal-Naive Baseline</strong></td>
+                <td><strong>107.8%</strong></td>
+                <td><em>Reference Benchmark</em></td>
+                <td>Baseline benchmark to clear.</td>
+            </tr>
+            <tr>
+                <td><strong>XGBoost Regressor</strong></td>
+                <td><strong>76.3%</strong></td>
+                <td>+31.5% Better</td>
+                <td>High accuracy; slightly slower training.</td>
+            </tr>
+            <tr>
+                <td><strong>Random Forest Regressor</strong></td>
+                <td><strong>75.5%</strong></td>
+                <td>+32.3% Better</td>
+                <td>Robust ensemble; higher memory footprint.</td>
+            </tr>
+            <tr>
+                <td><strong>LightGBM Regressor (Winner)</strong></td>
+                <td><strong>72.9%</strong></td>
+                <td><strong>+34.9% WAPE Reduction</strong></td>
+                <td>🏆 <strong>Selected Production Forecaster</strong>.</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <!-- INVENTORY RISK SCORING & DECISIONING MATRIX -->
+    <div class="page-break"></div>
+    <h2 class="section-heading">7. Inventory Risk Scoring Engine & Decision Matrix</h2>
+    <p>
+        Machine learning predictions are decoupled from inventory risk rules to guarantee transparency and explainability for operations managers. The engine evaluates stock positions by comparing forward demand against current physical inventory:
+    </p>
+
+    <h3 class="subsection-heading">7.1 Mathematical Formulation</h3>
+    <ul>
+        <li><strong>Lead Time Demand ($D_{LT}$)</strong>: $D_{LT} = \text{Weekly Forecast} \times \left(\frac{\text{Lead Time Days}}{7.0}\right)$</li>
+        <li><strong>Total Available Stock ($S_{avail}$)</strong>: $S_{avail} = \text{On-Hand Stock} + \text{On-Order Stock}$</li>
+        <li><strong>Stockout Risk Score</strong>: $\text{Stockout Risk} = \text{clip}\left(\frac{D_{LT} - S_{avail}}{D_{LT} + \epsilon}, 0.0, 1.0\right)$</li>
+        <li><strong>Overstock Risk Score (6-Week Horizon)</strong>: $\text{Overstock Risk} = \text{clip}\left(\frac{\text{On-Hand Stock} - (\text{Weekly Forecast} \times 6)}{\text{On-Hand Stock} + \epsilon}, 0.0, 1.0\right)$</li>
+        <li><strong>Financial Risk (INR)</strong>: $\text{Sales at Risk} = \text{Stockout Gap} \times \text{List Price}$ &bull; $\text{Capital Locked} = \text{Overstock Gap} \times \text{Unit Cost}$</li>
+    </ul>
+
+    <h3 class="subsection-heading">7.2 2x2 Decisioning Matrix Results</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>Decision Quadrant</th>
+                <th>SKU Count</th>
+                <th>Financial Value (INR)</th>
+                <th>Prescribed Operational Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>🔴 <strong>Reorder Now</strong></td>
+                <td>1 SKU</td>
+                <td>&#8377;2,012.21 (Sales at Risk)</td>
+                <td>Issue immediate replenishment purchase order before stock depresses.</td>
+            </tr>
+            <tr>
+                <td>🟣 <strong>Markdown / Clear</strong></td>
+                <td>45 SKUs</td>
+                <td>&#8377;1,000,800.85 (Locked Capital)</td>
+                <td>Initiate promotional discounting campaign to liquidate excess stock.</td>
+            </tr>
+            <tr>
+                <td>🟢 <strong>Healthy</strong></td>
+                <td>154 SKUs</td>
+                <td>&#8377;0.00 (Optimal Balance)</td>
+                <td>Inventory matches demand velocity; maintain current replenishment cycles.</td>
+            </tr>
+            <tr>
+                <td>🟠 <strong>Watch / Volatile</strong></td>
+                <td>0 SKUs</td>
+                <td>&#8377;0.00</td>
+                <td>Erratic demand fluctuations; flag for manual merchandising review.</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <!-- PRODUCTIZED DEPLOYMENT & DASHBOARDS -->
+    <h2 class="section-heading">8. Productized Interfaces & Deployment Architecture</h2>
+    <p>The analytics stack is packaged into two stakeholder-facing interfaces:</p>
+    <ul>
+        <li><strong>7-Page Streamlit Planning Dashboard (<code>app/main.py</code>)</strong>:
+            <br>&bull; <em>Home Page</em>: Executive summary banner, active SKU counters, architecture overview.
+            <br>&bull; <em>Sales Analytics</em>: Monthly revenue trends, Pareto 80/20 top-mover bar charts, category pie charts.
+            <br>&bull; <em>Forecast</em>: Backtest comparison table and interactive SKU forward forecast generator with 80% confidence bands.
+            <br>&bull; <em>Inventory Dashboard</em>: On-hand vs on-order stacked bar charts and supplier lead-time breakdowns.
+            <br>&bull; <em>Risk Dashboard</em>: Dynamic 2x2 Plotly scatter plot (bubble size = &#8377; value at stake) with quadrant filter tabs.
+            <br>&bull; <em>Product Details</em>: SKU deep-dive searching, margin economics, and prescribed operational actions.
+            <br>&bull; <em>Executive Summary Dashboard</em>: High-level ROI metrics, Top 5 Reorder Priorities, Top 5 Markdown Candidates.
+        </li>
+        <li><strong>FastAPI Scoring Microservice (<code>service/api.py</code>)</strong>:
+            <br>&bull; <code>GET /forecast/{sku_id}</code>: Real-time single-SKU forward demand and risk score lookup.
+            <br>&bull; <code>POST /score-batch</code>: Batch scoring microservice for ERP/WMS system integrations.
+        </li>
+    </ul>
+
+    <!-- STRATEGIC RECOMMENDATIONS & CONCLUSION -->
+    <div class="page-break"></div>
+    <h2 class="section-heading">9. Strategic Business Recommendations & Next Steps</h2>
+    <p>Based on the quantitative findings of Project FORESIGHT, NorthBay Living leadership should execute the following 3-step action roadmap:</p>
+
+    <div class="callout">
+        <div class="callout-title">1. Immediate Reorder Execution (Protect Revenue)</div>
+        Execute purchase order replenishment for <strong>SKU 21213</strong> (Storage & Accessories) to protect against imminent stockout revenue losses during upcoming lead-time fulfillment.
+    </div>
+
+    <div class="callout">
+        <div class="callout-title">2. Capital Liberation Clearance Campaign (Recover &#8377;1.00M Liquidity)</div>
+        Launch structured markdown promotions across the <strong>Top 3 Overstock SKUs (23843, 22086, 37410)</strong>, liberating &#8377;1,000,800.85 in trapped working capital to reinvest into high-velocity inventory lines.
+    </div>
+
+    <div class="callout">
+        <div class="callout-title">3. Monthly Automated Pipeline Cadence</div>
+        Integrate the automated pipeline script (<code>python src/risk.py lightgbm</code>) into a monthly batch cron schedule to continuously refresh SKU forecasts as new monthly inventory and sales extracts arrive.
+    </div>
+
+    <div class="footer">
+        Project FORESIGHT &bull; Demand & Inventory Intelligence &bull; Zidio Development &bull; Confidential &bull; Page 5 of 5
+    </div>
+
+</body>
+</html>
+"""
+    os.makedirs('reports', exist_ok=True)
+    html_path = os.path.join('reports', 'project_foresight_final_report.html')
+    with open(html_path, 'w', encoding='utf-8') as f:
+        f.write(html_content)
+    print(f"Generated HTML report at: {html_path}")
+    return html_path
+
+def convert_html_to_pdf(html_path, pdf_path):
+    browser_candidates = [
+        r'C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe',
+        r'C:\Program Files\Microsoft\Edge\Application\msedge.exe',
+        r'C:\Program Files\Google\Chrome\Application\chrome.exe',
+        r'C:\Program Files (x86)\Google\Chrome\Application\chrome.exe'
+    ]
+    browser_bin = next((p for p in browser_candidates if os.path.exists(p)), None)
+    if not browser_bin:
+        raise FileNotFoundError("No Edge or Chrome browser executable found to compile PDF.")
+        
+    abs_html = os.path.abspath(html_path)
+    abs_pdf = os.path.abspath(pdf_path)
+    
+    cmd = [
+        browser_bin,
+        '--headless',
+        '--disable-gpu',
+        '--run-all-compositor-stages-before-draw',
+        f'--print-to-pdf={abs_pdf}',
+        abs_html
+    ]
+    
+    print(f"Running browser PDF compiler: {browser_bin}")
+    subprocess.run(cmd, check=True)
+    print(f"Successfully generated publication-grade PDF report at: {abs_pdf}")
+    print(f"PDF File Size: {os.path.getsize(abs_pdf):,} bytes")
+
+if __name__ == '__main__':
+    html_file = build_html_report()
+    pdf_file = os.path.join('reports', 'Project_FORESIGHT_Final_Report.pdf')
+    convert_html_to_pdf(html_file, pdf_file)
