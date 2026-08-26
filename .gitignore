@@ -61,20 +61,19 @@ ENV/
 env.bak/
 venv.bak/
 
-# Data Files & Heavy Datasets (Ignore raw/processed dumps & zips)
-data/raw/*.zip
-data/raw/*.xlsx
-data/raw/*.csv
-data/processed/*.csv
-*.csv
-*.xlsx
+# Data Files & Heavy Raw Datasets (Ignore raw dumps & zips)
+data/raw/
 *.zip
-*.pdf
+*.xlsx
 *.parquet
 *.h5
 *.pkl
 *.joblib
-!data/.gitkeep
+*.pdf
+
+# Allow processed star schema datasets & reports for cloud deployment
+!data/processed/*.csv
+!reports/*.csv
 
 # Operating System Files
 .DS_Store
