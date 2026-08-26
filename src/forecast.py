@@ -6,10 +6,18 @@ using Rolling-Origin Cross-Validation.
 import numpy as np
 import pandas as pd
 from sklearn.ensemble import RandomForestRegressor
-from lightgbm import LGBMRegressor
-from xgboost import XGBRegressor
 import warnings
 warnings.filterwarnings('ignore')
+
+try:
+    from lightgbm import LGBMRegressor
+except ImportError:
+    LGBMRegressor = None
+
+try:
+    from xgboost import XGBRegressor
+except ImportError:
+    XGBRegressor = None
 
 FEATURE_COLS = [
     'week', 'month', 'unit_cost', 'list_price', 'avg_price',
@@ -59,7 +67,10 @@ class RandomForestForecaster:
 
 class XGBoostForecaster:
     def __init__(self):
-        self.model = XGBRegressor(n_estimators=100, learning_rate=0.05, max_depth=6, random_state=42)
+        if XGBRegressor is not None:
+            self.model = XGBRegressor(n_estimators=100, learning_rate=0.05, max_depth=6, random_state=42)
+        else:
+            self.model = RandomForestRegressor(n_estimators=50, max_depth=8, random_state=42, n_jobs=-1)
         
     def fit(self, df):
         clean_df = df.dropna(subset=['units_sold'] + FEATURE_COLS)
@@ -71,7 +82,10 @@ class XGBoostForecaster:
 
 class LightGBMForecaster:
     def __init__(self):
-        self.model = LGBMRegressor(n_estimators=150, learning_rate=0.05, num_leaves=31, random_state=42, verbose=-1)
+        if LGBMRegressor is not None:
+            self.model = LGBMRegressor(n_estimators=150, learning_rate=0.05, num_leaves=31, random_state=42, verbose=-1)
+        else:
+            self.model = RandomForestRegressor(n_estimators=50, max_depth=10, random_state=42, n_jobs=-1)
         
     def fit(self, df):
         clean_df = df.dropna(subset=['units_sold'] + FEATURE_COLS)
@@ -101,7 +115,6 @@ def compare_all_models_rolling_cv(df, n_splits=4, horizon_weeks=4):
         
         # Fit & Predict Models
         base = SeasonalNaiveBaseline().predict(test_df)
-        
         rf = RandomForestForecaster().fit(train_df).predict(test_df)
         xgb = XGBoostForecaster().fit(train_df).predict(test_df)
         lgb = LightGBMForecaster().fit(train_df).predict(test_df)
